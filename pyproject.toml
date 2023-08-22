@@ -1,0 +1,107 @@
+[tool.poetry]
+name = "FastAPi, CloudRun, PubSub"
+version = "0.1.0"
+description = ""
+authors = ["Tobiasz Kędzierski <tobiasz.kedzierski@gmail.com>"]
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "*"
+google-cloud-pubsub = "^2"
+google-cloud-storage = "^2"
+pydantic = {extras = ["dotenv"], version = "*"}
+pydantic-settings = "*"
+tenacity = "*"
+uvicorn = "*"
+
+[tool.poetry.group.dev.dependencies]
+bandit = {extras = ["toml"], version = "*"}
+black = "*"
+factory-boy = "*"
+gevent = "*"
+ipdb = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-asyncio = "*"
+pytest-cov = "*"
+pytest-env = "*"
+pytest-random-order = "*"
+pytest-socket = "*"
+requests-toolbelt = "*"
+respx = "*"
+ruff = "*"
+
+[tool.poetry.group.docs.dependencies]
+diagrams = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+select = [
+    "ANN",  # flake8-annotations
+    "B",    # flake8-bugbear
+    "BLE",  # flake8-blind-except
+    "C4",   # flake8-comprehensions
+    "C90",  # mccabe
+    "COM",  # flake8-commas
+    "DTZ",  # flake8-datetimez
+    "E",    # pycodestyle
+    "EM",   # flake8-errmsg
+    "ERA",  # eradicate
+    "EXE",  # flake8-executable
+    "F",    # Pyflakes
+    "FBT",  # flake8-boolean-trap
+    "G",    # flake8-logging-format
+    "INP",  # flake8-no-pep420
+    "ISC",  # flake8-implicit-str-concat
+    "N",    # pep8-naming
+    "PGH",  # pygrep-hooks
+    "PIE",  # flake8-pie
+    "PL",   # pylint
+    "PT",   # flake8-pytest-style
+    "PTH",  # flake8-use-pathlib
+    "Q",    # flake8-quotes
+    "RET",  # flake8-return
+    "RSE",  # flake8-raise
+    "RUF",  # ruff-specific rules
+    "S",    # flake8-bandit
+    "SIM",  # flake8-simplify
+    "T10",  # flake8-debugger
+    "T20",  # flake8-print
+    "TCH",  # flake8-type-checking
+    "TID",  # flake8-tidy-imports
+    "UP",   # pyupgrade
+    "W",    # pycodestyle
+]
+target-version = "py311"
+line-length = 120
+
+[tool.black]
+line-length = 120
+
+[tool.mypy]
+ignore_missing_imports = true
+plugins = "pydantic.mypy"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+force_single_line = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = """
+    --random-order
+    --disable-socket
+    --allow-hosts=database,::1
+    --allow-unix-socket
+"""
+
+[tool.bandit]
+exclude_dirs = ["tests"]
