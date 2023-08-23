@@ -1,0 +1,45 @@
+services:
+  api:
+    image: fastapi_cloudrun_pubsub
+    container_name: fastapi_cloudrun_pubsub_api
+    build:
+      context: .
+      dockerfile: ./compose/Dockerfile
+      target: development
+    env_file: .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app/
+    depends_on:
+      - pubsub
+      - worker
+    restart: always
+
+  worker:
+    image: fastapi_cloudrun_pubsub
+    container_name: fastapi_cloudrun_pubsub_worker
+    build:
+      context: .
+      dockerfile: ./compose/Dockerfile
+      target: development
+    command: "/start_worker_dev"
+#    command: "python /app/scripts/setup_pubsub_emulator/setup.py"
+    env_file: .env
+    environment:
+      - PORT=8081
+    ports:
+      - "8081:8081"
+    volumes:
+      - .:/app/
+    depends_on:
+      - pubsub
+    restart: always
+
+  pubsub:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    container_name: gcp-pubsub-emulator
+    env_file: .env
+    ports:
+      - "8538:8538"
+    command: gcloud beta emulators pubsub start --project ${PUBSUB_PROJECT_ID} --host-port 0.0.0.0:8538

@@ -1,9 +1,6 @@
+# FastAPI, CloudRun, PubSub -> Python API and background workers on Google Cloud Platform
 
-
-# FastAPI, CloudRUn, PubSub
-
-#[![pre-commit](https://github.com/TobKed/fastapi_cloudrun_pubsub/actions/workflows/ci.yaml/badge.svg?branch=master&event=push)](https://github.com/TobKed/fastapi_cloudrun_pubsub/actions/workflows/ci.yaml)
-
+[![pre-commit](https://github.com/TobKed/fastapi_cloudrun_pubsub/actions/workflows/ci.yaml/badge.svg?branch=master&event=push)](https://github.com/TobKed/fastapi_cloudrun_pubsub/actions/workflows/ci.yaml)
 
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
@@ -40,3 +37,6 @@
 ## Warnings
 
 ## Links
+
+- https://github.com/googleapis/python-pubsub/blob/main/samples/snippets/subscriber.py
+- https://github.com/expobrain/pubsub-emulator-messaging-setup/blob/main/pubsub_emulator_messaging_setup/pubsub.py

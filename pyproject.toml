@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "FastAPi, CloudRun, PubSub"
 version = "0.1.0"
-description = ""
+description = "FastAPI, CloudRun, PubSub -> Python API and background workers on Google Cloud Platform"
 authors = ["Tobiasz Kędzierski <tobiasz.kedzierski@gmail.com>"]
 readme = "README.md"
 packages = []
@@ -11,9 +11,9 @@ python = "^3.11"
 fastapi = "*"
 google-cloud-pubsub = "^2"
 google-cloud-storage = "^2"
+loguru = "^0.7.0"
 pydantic = {extras = ["dotenv"], version = "*"}
 pydantic-settings = "*"
-tenacity = "*"
 uvicorn = "*"
 
 [tool.poetry.group.dev.dependencies]
