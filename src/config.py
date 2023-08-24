@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     title: str = "Fast API, CluudRun and PubSub"
     version: str = "0.0.1"
 
+    max_file_size: int = 5 * 1024 * 1024  # 5MB
+    allowed_content_types: tuple[str, ...] = ("image/jpeg", "image/png")
+
     google_project_id: str
     pubsub_main_topic: str
 

@@ -13,7 +13,7 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
         status_code=status.HTTP_400_BAD_REQUEST,
         content={"detail": jsonable_encoder(exc.errors())},
     )
-    logger.debug(f"Request validation exception: {response.body}")
+    logger.error(f"Validation exception: {response.body}")
     return response
 
 

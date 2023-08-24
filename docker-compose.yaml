@@ -12,7 +12,6 @@ services:
     volumes:
       - .:/app/
     depends_on:
-      - pubsub
       - worker
     restart: always
 
@@ -34,6 +33,7 @@ services:
       - .:/app/
     depends_on:
       - pubsub
+      - datastore
     restart: always
 
   pubsub:
@@ -43,3 +43,11 @@ services:
     ports:
       - "8538:8538"
     command: gcloud beta emulators pubsub start --project ${PUBSUB_PROJECT_ID} --host-port 0.0.0.0:8538
+
+  datastore:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    container_name: gcp-datastore-emulator
+    env_file: .env
+    ports:
+      - "8432:8432"
+    command: gcloud beta emulators datastore start --project ${DATASTORE_PROJECT_ID} --host-port 0.0.0.0:8432
