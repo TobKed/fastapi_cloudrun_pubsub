@@ -79,6 +79,14 @@ select = [
     "UP",   # pyupgrade
     "W",    # pycodestyle
 ]
+ignore = [
+    "ANN002",   # Missing type annotation for *args
+    "ANN003",   # Missing type annotation for **kwargs
+    "ANN101",   # Missing type annotation for self in method
+    "ANN102",   # Missing type annotation for cls in classmethod
+    "ANN401",   # Dynamically typed expressions (typing.Any) are disallowed
+    "EXE002",   # The file is executable but no shebang is present
+]
 target-version = "py311"
 line-length = 120
 

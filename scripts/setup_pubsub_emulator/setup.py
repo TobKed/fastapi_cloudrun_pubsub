@@ -1,5 +1,6 @@
-from config import get_settings
 from pubsub import setup_pubsub_emulator
+
+from config import get_settings
 
 settings = get_settings()
 
