@@ -12,6 +12,8 @@ class QueueService:
 
     def __init__(self, settings: Settings = Depends(get_settings)) -> None:
         self.settings = settings
+        self.topic = self.settings.pubsub_generate_thumbnails_topic
+        self.project = self.settings.pubsub_project_id or self.settings.google_project_id
 
     @property
     def publisher_client(self) -> pubsub_v1.PublisherClient:
@@ -24,8 +26,8 @@ class QueueService:
         logger.debug(f"Publishing message: `{message=}`, `{attrs=}`")
 
         pubsub_topic_path = self.publisher_client.topic_path(
-            project=self.settings.google_project_id,
-            topic=self.settings.pubsub_generate_thumbnails,
+            project=self.project,
+            topic=self.topic,
         )
         future = self.publisher_client.publish(
             topic=pubsub_topic_path,

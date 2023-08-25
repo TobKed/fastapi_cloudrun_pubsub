@@ -16,7 +16,7 @@ async def generate_thumbnails(
     image_service: ImageService = Depends(ImageService),
 ) -> None:
     logger.debug(f"Request from PubSub: {pubsub_request}")
-    image_service.process_thumbnails_worker_request(
+    await image_service.process_thumbnails_worker_request(
         image_hash=pubsub_request.message.attributes.image_hash,
         image_url=pubsub_request.message.attributes.image_url,
     )
