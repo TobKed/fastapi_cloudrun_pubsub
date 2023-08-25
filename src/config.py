@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     allowed_content_types: tuple[str, ...] = ("image/jpeg", "image/png")
 
     google_project_id: str
-    pubsub_main_topic: str
+    pubsub_generate_thumbnails: str
 
     @property
     def fastapi_kwargs(self) -> dict[str, Any]:

@@ -39,4 +39,4 @@
 ## Links
 
 - https://github.com/googleapis/python-pubsub/blob/main/samples/snippets/subscriber.py
-- https://github.com/expobrain/pubsub-emulator-messaging-setup/blob/main/pubsub_emulator_messaging_setup/pubsub.py
+- https://github.com/expobrain/generate_thumbnails-emulator-messaging-setup/blob/main/generate_thumbnails_emulator_messaging_setup/generate_thumbnails.py
