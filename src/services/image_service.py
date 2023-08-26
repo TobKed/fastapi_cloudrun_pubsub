@@ -1,16 +1,13 @@
 import hashlib
 from tempfile import SpooledTemporaryFile
-from typing import Any
+from typing import IO
 
 import httpx
-from fastapi import BackgroundTasks
 from fastapi import Depends
 from fastapi import UploadFile
-from fastapi import status
 from fastapi.exceptions import RequestValidationError
 from PIL import Image
 
-from src.api.exceptions import ThumbnailGenerationError
 from src.config import Settings
 from src.config import get_settings
 from src.enums.image import ImageThumbnailsGenerationStatus
@@ -40,61 +37,6 @@ class ImageService:
         self.allowed_content_types = settings.allowed_content_types
 
     @debug_log_function_call
-    async def process_thumbnails_upload_request(
-        self,
-        file: UploadFile,
-        background_tasks: BackgroundTasks,
-    ) -> ImageThumbnails:
-        self.validate_image(file)
-        image_hash = await self.calculate_hash(file=file)
-        image_thumbnails = self.get_thumbnails(image_hash=image_hash)
-
-        if image_thumbnails and image_thumbnails.status.is_not_pending():
-            return image_thumbnails
-
-        image_thumbnails = ImageThumbnails(
-            image_hash=image_hash,
-            status=ImageThumbnailsGenerationStatus.PENDING,
-        )
-        self.upsert_thumbnails(image_thumbnails=image_thumbnails)
-        background_tasks.add_task(
-            self.send_to_worker,
-            file=file,
-            image_thumbnails=image_thumbnails,
-        )
-        return image_thumbnails
-
-    @debug_log_function_call
-    async def process_thumbnails_worker_request(self, *, image_hash: str, image_url: str) -> None:
-        try:
-            image_thumbnails = self.get_thumbnails(image_hash=image_hash)
-            if not image_thumbnails:
-                msg = f"Image thumbnails does not exist. {image_hash=}"
-                raise ThumbnailGenerationError(detail=msg, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            if image_thumbnails.thumbnails:
-                msg = f"Image thumbnails does not contain thumbnails. {image_thumbnails=}"
-                raise ThumbnailGenerationError(detail=msg, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            if image_thumbnails.status.is_done():
-                return
-
-            thumbnails = await self.generate_thumbnails(image_hash=image_hash, image_url=image_url)
-            image_thumbnails = ImageThumbnails(
-                image_hash=image_hash,
-                image_url=image_url,
-                thumbnails=thumbnails,
-                status=ImageThumbnailsGenerationStatus.SUCCESS,
-            )
-            self.upsert_thumbnails(image_thumbnails=image_thumbnails)
-        except:
-            image_thumbnails = ImageThumbnails(
-                image_hash=image_hash,
-                image_url=image_url,
-                status=ImageThumbnailsGenerationStatus.ERROR,
-            )
-            self.upsert_thumbnails(image_thumbnails=image_thumbnails)
-            raise
-
-    @debug_log_function_call
     def validate_image(self, file: UploadFile) -> None:
         """Validate the image file is of the correct type and size."""
         if file.content_type.lower() not in self.allowed_content_types:
@@ -105,8 +47,11 @@ class ImageService:
 
     @staticmethod
     @debug_log_function_call
-    async def calculate_hash(*, file: UploadFile, hash_algorithm: str = "sha256", chunk_size: int = 8192) -> str:
-        hash_object = hashlib.new(hash_algorithm)
+    async def calculate_hash(*, file: UploadFile) -> str:
+        """Calculate the sha256 hash of the file."""
+        hash_object = hashlib.sha256()
+        chunk_size: int = 8192
+
         while True:
             data = await file.read(chunk_size)
             if not data:
@@ -114,7 +59,7 @@ class ImageService:
             hash_object.update(data)
 
         await file.seek(0)
-        return hash_object.hexdigest() + "3333"
+        return hash_object.hexdigest()
 
     @debug_log_function_call
     def get_thumbnails(self, *, image_hash: str) -> ImageThumbnails | None:
@@ -132,7 +77,7 @@ class ImageService:
         self.database_service.get_entity(collection=self.collection, entity_id=image_thumbnails.image_hash)
 
     @debug_log_function_call
-    async def upload_image_to_storage(self, *, file: Any, blob_name: str, content_type: str | None = None) -> str:
+    async def upload_to_storage(self, *, file: IO, blob_name: str, content_type: str | None = None) -> str:
         return self.storage_service.upload(
             bucket_name=self.settings.cloud_storage_bucket,
             blob_name=blob_name,
@@ -141,13 +86,13 @@ class ImageService:
         )
 
     @debug_log_function_call
-    async def send_to_worker(self, *, file: UploadFile, image_thumbnails: ImageThumbnails) -> None:
+    async def send_generation_request_to_worker(self, *, file: UploadFile, image_thumbnails: ImageThumbnails) -> None:
         """
         Upload the image to storage and send a message to the worker.
         Update the image_thumbnails status to `queued`.
         """
         blob_name = f"{image_thumbnails.image_hash}{get_extension_from_filename(file.filename)}"
-        image_thumbnails.image_url = await self.upload_image_to_storage(
+        image_thumbnails.image_url = await self.upload_to_storage(
             file=file.file,
             blob_name=blob_name,
             content_type=file.content_type,
@@ -163,33 +108,52 @@ class ImageService:
         self.upsert_thumbnails(image_thumbnails=image_thumbnails)
 
     @debug_log_function_call
-    async def generate_thumbnails(self, image_hash: str, image_url: str) -> list[str]:
+    async def generate_thumbnails(self, *, image_hash: str, image_url: str) -> list[str]:
+        """
+        Generate thumbnails for the image.
+        Return a list of thumbnail urls.
+        """
         thumbnails = []
         async with httpx.AsyncClient() as client:
             r = await client.get(image_url)
             r.raise_for_status()
-            content_type = r.headers.get("content-type")
-            thumbnail_format = get_format_from_content_type(content_type)
+            image_content = r.content
+            image_content_type = r.headers.get("content-type")
+            thumbnail_format = get_format_from_content_type(image_content_type)
 
-            for thumbnail_size in self.settings.thumbnail_sizes:
-                with (
-                    SpooledTemporaryFile() as tmp_source_file,
-                    SpooledTemporaryFile() as tmp_thumbnail_file,
-                ):
-                    thumbnail_blob_name = f"{image_hash}-{thumbnail_size[0]}x{thumbnail_size[1]}.{thumbnail_format}"
+        for thumbnail_size in self.settings.thumbnail_sizes:
+            with (
+                SpooledTemporaryFile() as tmp_source_file,
+                SpooledTemporaryFile() as tmp_thumbnail_file,
+            ):
+                tmp_source_file.write(image_content)
+                self._generate_thumbnail(
+                    source_file_obj=tmp_source_file,
+                    thumbnail_file_obj=tmp_thumbnail_file,
+                    thumbnail_format=thumbnail_format,
+                    thumbnail_size=thumbnail_size,
+                )
 
-                    tmp_source_file.write(r.content)
-                    image = Image.open(tmp_source_file)
-                    image.thumbnail(thumbnail_size)
-                    image.save(tmp_thumbnail_file, format=thumbnail_format)
-                    tmp_thumbnail_file.seek(0)
+                thumbnail_blob_name = f"{image_hash}-{thumbnail_size[0]}x{thumbnail_size[1]}.{thumbnail_format}"
+                thumbnail_url = await self.upload_to_storage(
+                    file=tmp_thumbnail_file,
+                    blob_name=thumbnail_blob_name,
+                    content_type=image_content_type,
+                )
 
-                    thumbnail_url = await self.upload_image_to_storage(
-                        file=tmp_thumbnail_file,
-                        blob_name=thumbnail_blob_name,
-                        content_type=content_type,
-                    )
-
-                    thumbnails.append(thumbnail_url)
+                thumbnails.append(thumbnail_url)
 
         return thumbnails
+
+    @staticmethod
+    def _generate_thumbnail(
+        *,
+        thumbnail_format: str | None,
+        thumbnail_size: tuple[int, int],
+        source_file_obj: IO,
+        thumbnail_file_obj: IO,
+    ) -> None:
+        image = Image.open(source_file_obj)
+        image.thumbnail(thumbnail_size)
+        image.save(thumbnail_file_obj, format=thumbnail_format)
+        thumbnail_file_obj.seek(0)

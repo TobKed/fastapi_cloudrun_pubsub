@@ -1,4 +1,4 @@
-from typing import Any
+from typing import IO
 
 from fastapi import Depends
 from google.cloud import storage
@@ -22,7 +22,7 @@ class StorageService:
         return self._client
 
     @debug_log_function_call
-    def upload(self, bucket_name: str, blob_name: str, file: Any, content_type: str | None = None) -> str:
+    def upload(self, *, bucket_name: str, blob_name: str, file: IO, content_type: str | None = None) -> str:
         bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(blob_name)
         blob.upload_from_file(file, content_type=content_type)

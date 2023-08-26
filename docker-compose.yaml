@@ -23,7 +23,6 @@ services:
       dockerfile: ./compose/Dockerfile
       target: development
     command: "/start_worker_dev"
-#    command: "python /app/scripts/setup_pubsub_emulator/setup.py"
     env_file: .env
     environment:
       - PORT=8081

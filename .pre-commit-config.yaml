@@ -10,9 +10,21 @@ repos:
       - id: check-added-large-files
       - id: end-of-file-fixer
 
+  - repo: https://github.com/thlorenz/doctoc.git
+    rev: v2.2.0
+    hooks:
+      - id: doctoc
+        name: Add TOC for md files
+        files: \.md$
+        args:
+          - "--maxlevel"
+          - "4"
+          - "--title"
+          - "**Table of Contents**"
+
   # PYTHON
   - repo: https://github.com/astral-sh/ruff-pre-commit.git
-    rev: v0.0.285
+    rev: v0.0.286
     hooks:
       - id: ruff
   - repo: https://github.com/pycqa/isort
@@ -40,7 +52,7 @@ repos:
 
   # TERRAFORM
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.82.0
+    rev: v1.83.0
     hooks:
       - id: terraform_fmt
       - id: terraform_docs

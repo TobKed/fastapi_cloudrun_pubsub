@@ -7,6 +7,7 @@ def get_extension_from_filename(filename: str) -> str:
 
 
 def get_format_from_content_type(content_type: str) -> str | None:
+    """Return format supported by PIL.Image."""
     extension = mimetypes.guess_extension(content_type)
     if extension:
         extension = extension.lstrip(".")

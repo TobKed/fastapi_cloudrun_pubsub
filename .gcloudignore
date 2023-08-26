@@ -1,0 +1,10 @@
+#!include:.gitignore
+# Ignore everything
+*
+
+## Except files we want
+!.dockerignore
+!src/**
+!compose/**
+!pyproject.toml
+!poetry.lock

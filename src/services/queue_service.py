@@ -22,7 +22,11 @@ class QueueService:
         return self._publisher_client
 
     @debug_log_function_call
-    def publish(self, message: str, **attrs) -> str:
+    def publish(self, *, message: str = "", **attrs) -> str:
+        """
+        Publish a single message.
+        Return the message ID or raise an exception.
+        """
         logger.debug(f"Publishing message: `{message=}`, `{attrs=}`")
 
         pubsub_topic_path = self.publisher_client.topic_path(
