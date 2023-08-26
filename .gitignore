@@ -2,7 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=venv,linux,macos,dotenv,python,pycharm+all,jupyternotebooks,visualstudiocode
 
 ### dotenv ###
-.env
+.env*
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks

@@ -102,6 +102,18 @@ extend-immutable-calls = [
     "fastapi.Security",
 ]
 
+[tool.ruff.per-file-ignores]
+"migrations/*" = [
+    "INP001",   # File {filename} is part of an implicit namespace package. Add an __init__.py.
+]
+"tests/*" = [
+    "PLR0913",  # Too many arguments to function call
+    "PLR2004",  # Magic value used in comparison
+    "S101",     # Use of assert detected
+    "S105",     # Possible hardcoded password
+    "S106",     # Possible hardcoded password
+]
+
 [tool.black]
 line-length = 120
 
