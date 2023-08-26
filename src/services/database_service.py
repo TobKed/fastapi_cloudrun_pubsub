@@ -11,11 +11,12 @@ class DatabaseService:
     def __init__(self, settings: Settings = Depends(get_settings)) -> None:
         self.settings = settings
         self.project = self.settings.datastore_project_id or self.settings.google_project_id
+        self.database = self.settings.datastore_database
 
     @property
     def client(self) -> datastore.Client:
         if self._client is None:
-            self._client = datastore.Client(project=self.project)
+            self._client = datastore.Client(project=self.project, database=self.database)
         return self._client
 
     def get_entity(self, *, collection: str, entity_id: str) -> datastore.Entity | None:

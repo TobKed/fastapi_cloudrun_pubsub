@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     pubsub_generate_thumbnails_topic: str
     cloud_storage_bucket: str
+    datastore_database: str | None = None
 
     @property
     def fastapi_kwargs(self) -> dict[str, Any]:
