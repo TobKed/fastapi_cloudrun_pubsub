@@ -9,7 +9,12 @@ async def test_storage_service_upload_image(client, gcp_storage_client) -> None:
     file = "image.io"
     content_type = "image/jpeg"
 
-    storage_service.upload(bucket_name=bucket_name, blob_name=blob_name, file=file, content_type=content_type)
+    storage_service.upload(
+        bucket_name=bucket_name,
+        blob_name=blob_name,
+        file=file,  # type: ignore[arg-type]
+        content_type=content_type,
+    )
 
     bucket = gcp_storage_client.return_value.bucket
     blob = bucket.return_value.blob

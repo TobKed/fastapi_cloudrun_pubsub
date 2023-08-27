@@ -1,12 +1,6 @@
 locals {
   github_actions_account_roles = toset([
-    #    "roles/run.developer",
     "roles/artifactregistry.writer",
-    #    "roles/storage.objectViewer",
-  ])
-
-  service_accounts_to_impersonate_by_gh_actions = toset([
-    data.google_compute_default_service_account.default.name,
   ])
 }
 
@@ -30,13 +24,3 @@ module "github_actions_oidc" {
   github_repositories               = [var.oidc_github_repository]
   github_actions_service_account_id = google_service_account.github_actions_sa.id
 }
-
-#resource "google_service_account_iam_binding" "service_accounts_to_github_actions_iam_binding" {
-#  for_each           = local.service_accounts_to_impersonate_by_gh_actions
-#  service_account_id = each.key
-#  role               = "roles/iam.serviceAccountUser"
-#
-#  members = [
-#    "serviceAccount:${google_service_account.github_actions_sa.email}",
-#  ]
-#}

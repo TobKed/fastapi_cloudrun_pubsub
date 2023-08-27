@@ -1,8 +1,3 @@
-"""
-Setup the PubSub emulator for local development.
-Create topics and subscriptions for the generate_thumbnails service.
-"""
-
 from pubsub import setup_pubsub_emulator
 
 from config import get_settings

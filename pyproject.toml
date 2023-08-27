@@ -23,6 +23,7 @@ uvicorn = "*"
 [tool.poetry.group.dev.dependencies]
 bandit = {extras = ["toml"], version = "*"}
 black = "*"
+diagrams = "^0.23.3"
 factory-boy = "*"
 gevent = "*"
 ipdb = "*"
@@ -115,6 +116,10 @@ extend-immutable-calls = [
     "S101",     # Use of assert detected
     "S105",     # Possible hardcoded password
     "S106",     # Possible hardcoded password
+]
+
+"docs/*" = [
+    "INP001",   # File {filename} is part of an implicit namespace package.
 ]
 
 [tool.black]

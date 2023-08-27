@@ -6,6 +6,8 @@ import httpx
 from fastapi import Depends
 from fastapi import UploadFile
 from fastapi.exceptions import RequestValidationError
+from google.api_core.exceptions import GoogleAPICallError
+from loguru import logger
 from PIL import Image
 
 from src.config import Settings
@@ -92,20 +94,25 @@ class ImageService:
         Update the image_thumbnails status to `queued`.
         """
         blob_name = f"{image_thumbnails.image_hash}{get_extension_from_filename(file.filename)}"
-        image_thumbnails.image_url = await self.upload_to_storage(
-            file=file.file,
-            blob_name=blob_name,
-            content_type=file.content_type,
-        )
+        try:
+            image_thumbnails.image_url = await self.upload_to_storage(
+                file=file.file,
+                blob_name=blob_name,
+                content_type=file.content_type,
+            )
 
-        self.queue_service.publish(
-            message=image_thumbnails.image_hash,
-            image_hash=image_thumbnails.image_hash,
-            image_url=image_thumbnails.image_url,
-        )
+            self.queue_service.publish(
+                message=image_thumbnails.image_hash,
+                image_hash=image_thumbnails.image_hash,
+                image_url=image_thumbnails.image_url,
+            )
 
-        image_thumbnails.status = ImageThumbnailsGenerationStatus.QUEUED
-        self.upsert_thumbnails(image_thumbnails=image_thumbnails)
+            image_thumbnails.status = ImageThumbnailsGenerationStatus.QUEUED
+            self.upsert_thumbnails(image_thumbnails=image_thumbnails)
+        except GoogleAPICallError:
+            image_thumbnails.status = ImageThumbnailsGenerationStatus.ERROR
+            self.upsert_thumbnails(image_thumbnails=image_thumbnails)
+            logger.exception(f"Error generating thumbnails: {image_thumbnails=}", exc_info=True)
 
     @debug_log_function_call
     async def generate_thumbnails(self, *, image_hash: str, image_url: str) -> list[str]:

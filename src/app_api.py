@@ -22,7 +22,7 @@ async def upload_image(
     image_hash = await image_service.calculate_hash(file=file)
     image_thumbnails = image_service.get_thumbnails(image_hash=image_hash)
 
-    if image_thumbnails and image_thumbnails.status != ImageThumbnailsGenerationStatus.PENDING:
+    if image_thumbnails:
         return image_thumbnails
 
     image_thumbnails = ImageThumbnails(
@@ -38,7 +38,7 @@ async def upload_image(
     return image_thumbnails
 
 
-@app.get("/image/{image_hash}/")
+@app.get("/image/status/{image_hash}")
 async def get_image(
     image_hash: str,
     image_service: ImageService = Depends(ImageService),

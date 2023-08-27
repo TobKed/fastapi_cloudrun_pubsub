@@ -28,14 +28,12 @@ async def generate_thumbnails(
         if not image_thumbnails:
             msg = f"Image thumbnails does not exist. {image_hash=}"
             raise ThumbnailGenerationError(detail=msg, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if image_thumbnails.thumbnails:
-            msg = f"Image thumbnails does not contain thumbnails. {image_thumbnails=}"
-            raise ThumbnailGenerationError(detail=msg, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if image_thumbnails.status.is_done():
             logger.debug(f"Image thumbnails already processed: {image_thumbnails=}")
             return
 
         thumbnails = await image_service.generate_thumbnails(image_hash=image_hash, image_url=image_url)
+
         image_thumbnails = ImageThumbnails(
             image_hash=image_hash,
             image_url=image_url,

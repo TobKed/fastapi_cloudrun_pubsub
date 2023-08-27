@@ -33,38 +33,42 @@ setup-dev: ## setup dev environment: poetry, pre-commit
 	pre-commit install 2>&1
 	[ ! -e ".env" ] && cp ".env.example" ".env" || echo "file .env already exists"
 
+.PHONY: gcloud-auth
+gcloud-auth: ## Authenticate with gcloud
+	gcloud auth application-default login
+
 .PHONY: pre-commit
 pre-commit: ## Run pre-commit on all files
 	pre-commit run --all-files
 
 .PHONY: update-pre-commit
-update-pre-commit:  ## Update pre-commit hooks
+update-pre-commit: ## Update pre-commit hooks
 	pre-commit autoupdate
 
 .PHONY: run
-run:  ## Run docker-compose in detached mode
+run: ## Run docker-compose in detached mode
 	docker-compose -f docker-compose.yaml -f docker-compose.gcp-default-credentials.yaml up --detach
 
 .PHONY: stop
-stop:  ## Stop docker-compose
+stop: ## Stop docker-compose
 	docker-compose down
 
 .PHONY: build
-build: purge  ## Build docker-compose from scratch
+build: purge ## Build docker-compose from scratch
 	docker-compose build
 
 .PHONY: purge
-purge:  ## Purge docker-compose
+purge: ## Purge docker-compose
 	docker-compose down --remove-orphans
 
 .PHONY: logs
-logs:  ## Show docker-compose logs
+logs: ## Show docker-compose logs
 	docker-compose logs --timestamps --follow
 
 .PHONY: test
-test:  ## Run pytest
+test: ## Run pytest
 	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest ${args}
 
 .PHONY: test-verbose
-test-verbose:  ## Run pytest with verbose output
+test-verbose: ## Run pytest with verbose output
 	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest -s -x -vv --pdb ${args}
