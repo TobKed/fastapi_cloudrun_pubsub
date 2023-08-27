@@ -22,7 +22,7 @@ async def upload_image(
     image_hash = await image_service.calculate_hash(file=file)
     image_thumbnails = image_service.get_thumbnails(image_hash=image_hash)
 
-    if image_thumbnails and image_thumbnails.status.is_not_pending():
+    if image_thumbnails and image_thumbnails.status != ImageThumbnailsGenerationStatus.PENDING:
         return image_thumbnails
 
     image_thumbnails = ImageThumbnails(

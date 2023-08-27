@@ -32,6 +32,7 @@ async def generate_thumbnails(
             msg = f"Image thumbnails does not contain thumbnails. {image_thumbnails=}"
             raise ThumbnailGenerationError(detail=msg, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
         if image_thumbnails.status.is_done():
+            logger.debug(f"Image thumbnails already processed: {image_thumbnails=}")
             return
 
         thumbnails = await image_service.generate_thumbnails(image_hash=image_hash, image_url=image_url)
@@ -42,14 +43,14 @@ async def generate_thumbnails(
             status=ImageThumbnailsGenerationStatus.SUCCESS,
         )
         image_service.upsert_thumbnails(image_thumbnails=image_thumbnails)
-    except:
+    except ThumbnailGenerationError:
+        logger.exception(f"Error generating thumbnails: {image_hash=}", exc_info=True)
         image_thumbnails = ImageThumbnails(
             image_hash=image_hash,
             image_url=image_url,
             status=ImageThumbnailsGenerationStatus.ERROR,
         )
         image_service.upsert_thumbnails(image_thumbnails=image_thumbnails)
-        raise
 
 
 @app.post("/generate_thumbnails_dlq", status_code=status.HTTP_204_NO_CONTENT)

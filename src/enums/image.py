@@ -10,9 +10,3 @@ class ImageThumbnailsGenerationStatus(StrEnum):
 
     def is_done(self) -> bool:
         return self in (self.SUCCESS, self.ERROR)
-
-    def is_queued(self) -> bool:
-        return self == self.QUEUED
-
-    def is_not_pending(self) -> bool:
-        return self != self.PENDING

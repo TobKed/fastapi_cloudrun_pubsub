@@ -1,6 +1,5 @@
 from fastapi import Depends
 from google.cloud import pubsub_v1
-from loguru import logger
 
 from src.config import Settings
 from src.config import get_settings
@@ -27,8 +26,6 @@ class QueueService:
         Publish a single message.
         Return the message ID or raise an exception.
         """
-        logger.debug(f"Publishing message: `{message=}`, `{attrs=}`")
-
         pubsub_topic_path = self.publisher_client.topic_path(
             project=self.project,
             topic=self.topic,

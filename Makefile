@@ -19,7 +19,7 @@ WORKTREE_ROOT := $(shell git rev-parse --show-toplevel 2> /dev/null)
 
 
 SRC_DIR = src
-DOCKER_COMPOSE_SERVICE_API = api
+DOCKER_COMPOSE_SERVICE_WORKER = worker
 
 .PHONY: help
 help: ## Show this help
@@ -63,8 +63,8 @@ logs:  ## Show docker-compose logs
 
 .PHONY: test
 test:  ## Run pytest
-	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_API) pytest ${args}
+	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest ${args}
 
 .PHONY: test-verbose
 test-verbose:  ## Run pytest with verbose output
-	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_API)  pytest -s -vv ${args}
+	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest -s -x -vv --pdb ${args}
