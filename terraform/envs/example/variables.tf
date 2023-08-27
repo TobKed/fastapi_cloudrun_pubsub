@@ -69,3 +69,12 @@ variable "container_command_worker" {
   type        = list(string)
   default     = ["/start_worker"]
 }
+
+##########################################
+# GitHub Actions OIDC
+##########################################
+
+variable "oidc_github_repository" {
+  description = "GitHub repository for which the OIDC will be configures"
+  type        = string
+}

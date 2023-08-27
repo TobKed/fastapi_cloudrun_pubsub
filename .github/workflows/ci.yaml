@@ -5,6 +5,19 @@ on:
   push:
     branches: [master]
 
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT_ID: ${{ secrets.project_id }}
+  APP_IMAGE_NAME: "thumbnails-generation"
+  DOCKER_REGISTRY: "europe-west1-docker.pkg.dev"
+  DOCKER_REPO: "thumbnails-generation-repository"
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -16,7 +29,7 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: 3.11
-    - name: "install terraform-docs"
+    - name: install terraform-docs
       run: >
         curl -L
         "$(curl -s https://api.github.com/repos/terraform-docs/terraform-docs/releases/latest
@@ -25,7 +38,60 @@ jobs:
         && tar -xzf terraform-docs.tgz terraform-docs
         && chmod +x terraform-docs
         && sudo mv terraform-docs /usr/bin/
-    - name: "pre-commit"
+    - name: pre-commit
       uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507  # v3.0.0
       with:
         extra_args: --all-files --show-diff-on-failure --color always
+
+  test:
+    needs: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout ${{ github.ref }} ( ${{ github.sha }} )"
+        uses: actions/checkout@v3
+
+      - name: Copy env file
+        run: cp .env.example .env
+
+      - name: Run Unit Tests
+        run: make test-verbose
+
+  build-and-push-docker-images:
+    if: >
+      github.ref == 'refs/heads/master' &&
+      github.event_name == 'push' &&
+      github.repository == 'TobKed/fastapi_cloudrun_pubsub'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout ${{ github.ref }} ( ${{ github.sha }} )"
+        uses: actions/checkout@v3
+
+      - name: GCP Authentication
+        uses: google-github-actions/auth@35b0e87d162680511bf346c299f71c9c5c379033  # v1.1.1
+        with:
+          workload_identity_provider: ${{ secrets.workload_identity_provider }}
+          service_account: ${{ secrets.service_account }}
+          access_token_lifetime: '1200s'
+          token_format: 'access_token'
+          create_credentials_file: 'true'
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@e30db14379863a8c79331b04a9969f4c1e225e0b  # v1.1.1
+
+      - name: Configure docker to use the gcloud
+        run: gcloud auth configure-docker --quiet $DOCKER_REGISTRY
+
+      - name: Build image
+        run: |
+          docker build . \
+            --target production \
+            -f compose/Dockerfile \
+            -t "$DOCKER_REGISTRY/$PROJECT_ID/$DOCKER_REPO/$APP_IMAGE_NAME:latest" \
+            -t "$DOCKER_REGISTRY/$PROJECT_ID/$DOCKER_REPO/$APP_IMAGE_NAME:$GITHUB_SHA"
+
+      - name: Push image
+        run: docker push $DOCKER_REGISTRY/$PROJECT_ID/$DOCKER_REPO/$APP_IMAGE_NAME --all-tags

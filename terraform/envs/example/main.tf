@@ -40,6 +40,7 @@ module "enable_google_apis" {
     "artifactregistry.googleapis.com",
     "compute.googleapis.com",
     "firestore.googleapis.com",
+    "iamcredentials.googleapis.com",
     "pubsub.googleapis.com",
     "run.googleapis.com",
   ]

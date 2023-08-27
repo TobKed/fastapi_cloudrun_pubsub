@@ -2,4 +2,5 @@ gcp_project_id = "your-project-id"
 gcp_region     = "europe-west1"
 gcp_zone       = "europe-west1-b"
 
-app_name = "thumbnails-generation"
+app_name               = "thumbnails-generation"
+oidc_github_repository = "TobKed/fastapi_cloudrun_pubsub"
