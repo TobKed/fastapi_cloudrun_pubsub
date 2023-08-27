@@ -19,7 +19,6 @@ from src.services.queue_service import QueueService
 from src.services.storage_service import StorageService
 from src.utils.helpers import get_extension_from_filename
 from src.utils.helpers import get_format_from_content_type
-from src.utils.logging import debug_log_function_call
 
 
 class ImageService:
@@ -38,7 +37,6 @@ class ImageService:
         self.storage_service = storage_service
         self.allowed_content_types = settings.allowed_content_types
 
-    @debug_log_function_call
     def validate_image(self, file: UploadFile) -> None:
         """Validate the image file is of the correct type and size."""
         if file.content_type.lower() not in self.allowed_content_types:
@@ -48,7 +46,6 @@ class ImageService:
             raise RequestValidationError("File size is too large.")  # noqa: EM101
 
     @staticmethod
-    @debug_log_function_call
     async def calculate_hash(*, file: UploadFile) -> str:
         """Calculate the sha256 hash of the file."""
         hash_object = hashlib.sha256()
@@ -63,12 +60,10 @@ class ImageService:
         await file.seek(0)
         return hash_object.hexdigest()
 
-    @debug_log_function_call
     def get_thumbnails(self, *, image_hash: str) -> ImageThumbnails | None:
         data = self.database_service.get_entity(collection=self.collection, entity_id=image_hash)
         return ImageThumbnails(**data) if data else None
 
-    @debug_log_function_call
     def upsert_thumbnails(self, *, image_thumbnails: ImageThumbnails) -> None:
         data = image_thumbnails.model_dump()
         self.database_service.upsert_entity(
@@ -78,7 +73,6 @@ class ImageService:
         )
         self.database_service.get_entity(collection=self.collection, entity_id=image_thumbnails.image_hash)
 
-    @debug_log_function_call
     async def upload_to_storage(self, *, file: IO, blob_name: str, content_type: str | None = None) -> str:
         return self.storage_service.upload(
             bucket_name=self.settings.cloud_storage_bucket,
@@ -87,7 +81,6 @@ class ImageService:
             content_type=content_type,
         )
 
-    @debug_log_function_call
     async def send_generation_request_to_worker(self, *, file: UploadFile, image_thumbnails: ImageThumbnails) -> None:
         """
         Upload the image to storage and send a message to the worker.
@@ -114,7 +107,6 @@ class ImageService:
             self.upsert_thumbnails(image_thumbnails=image_thumbnails)
             logger.exception(f"Error generating thumbnails: {image_thumbnails=}", exc_info=True)
 
-    @debug_log_function_call
     async def generate_thumbnails(self, *, image_hash: str, image_url: str) -> list[str]:
         """
         Generate thumbnails for the image.

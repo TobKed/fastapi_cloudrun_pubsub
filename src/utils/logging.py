@@ -19,5 +19,4 @@ def debug_log_function_call(func):
 
     if asyncio.iscoroutinefunction(func):
         return wrapper_async
-    else:  # noqa: RET505
-        return wrapper_sync
+    return wrapper_sync

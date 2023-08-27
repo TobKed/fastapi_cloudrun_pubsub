@@ -5,7 +5,6 @@ from google.cloud import storage
 
 from src.config import Settings
 from src.config import get_settings
-from src.utils.logging import debug_log_function_call
 
 
 class StorageService:
@@ -21,7 +20,6 @@ class StorageService:
             self._client = storage.Client(project=self.project)
         return self._client
 
-    @debug_log_function_call
     def upload(self, *, bucket_name: str, blob_name: str, file: IO, content_type: str | None = None) -> str:
         bucket = self.client.bucket(bucket_name)
         blob = bucket.blob(blob_name)

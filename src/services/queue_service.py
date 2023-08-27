@@ -3,7 +3,6 @@ from google.cloud import pubsub_v1
 
 from src.config import Settings
 from src.config import get_settings
-from src.utils.logging import debug_log_function_call
 
 
 class QueueService:
@@ -20,7 +19,6 @@ class QueueService:
             self._publisher_client = pubsub_v1.PublisherClient()
         return self._publisher_client
 
-    @debug_log_function_call
     def publish(self, *, message: str = "", **attrs) -> str:
         """
         Publish a single message.
