@@ -27,6 +27,7 @@ Putting a Python app and infrastructure together from scratch can be a tedious a
     - [Project setup](#project-setup)
   - [Authorize to Google Cloud](#authorize-to-google-cloud)
   - [Run app and tests](#run-app-and-tests)
+- [Things to improve](#things-to-improve)
 - [Links](#links)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -381,6 +382,16 @@ Usually I run `make run` and `make logs` to play with the app.
 To run tests, use `make test` or `make test-verbose`.
 
 When app is running documentation is available under http://0.0.0.0:8080/docs for API and http://localhost:8081/docs for worker.
+
+## Things to improve
+
+If you decide to use this repository as a base for your project, you may want to consider the following improvements:
+
+- [ ] Add HTTPS
+- [ ] Add authentication
+- [ ] Add API versioning
+- [ ] Add handling dead letter queue messages (not it is just debug log)
+- [ ] Add monitoring and alerting
 
 ## Links
 
