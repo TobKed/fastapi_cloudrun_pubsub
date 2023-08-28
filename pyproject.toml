@@ -111,8 +111,10 @@ extend-immutable-calls = [
     "ANN001",   # Missing type annotation for function argument
     "ANN201",   # Missing return type annotation
     "FBT001",   # Boolean-typed positional argument
+    "FBT002",   # Boolean default positional argument in function definition"
     "PLR0913",  # Too many arguments to function call
     "PLR2004",  # Magic value used in comparison
+    "RUF012",   # Mutable class attributes should be annotated with `typing.ClassVar`
     "S101",     # Use of assert detected
     "S105",     # Possible hardcoded password
     "S106",     # Possible hardcoded password

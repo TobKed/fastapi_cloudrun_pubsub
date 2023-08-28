@@ -2,7 +2,7 @@ from src.services.storage_service import StorageService
 from tests.conftest import settings
 
 
-async def test_storage_service_upload_image(client, gcp_storage_client) -> None:
+async def test_storage_service_upload_image(gcp_storage_client) -> None:
     storage_service = StorageService(settings=settings)
     bucket_name = "test-bucket"
     blob_name = "test.jpeg"

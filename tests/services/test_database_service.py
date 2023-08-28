@@ -4,7 +4,7 @@ from src.services.database_service import DatabaseService
 from tests.conftest import settings
 
 
-async def test_database_get_entity(client, gcp_datastore_client) -> None:
+async def test_database_get_entity(gcp_datastore_client) -> None:
     database_service = DatabaseService(settings=settings)
     collection = "CollectionName"
     entity_id = "entity-id"
@@ -19,7 +19,7 @@ async def test_database_get_entity(client, gcp_datastore_client) -> None:
 
 
 @mock.patch("google.cloud.datastore.Entity")
-async def test_database_upsert_entity(entity_mock, client, gcp_datastore_client) -> None:
+async def test_database_upsert_entity(entity_mock, gcp_datastore_client) -> None:
     database_service = DatabaseService(settings=settings)
     collection = "CollectionName"
     entity_id = "entity-id"

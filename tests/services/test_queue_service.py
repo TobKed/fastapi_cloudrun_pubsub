@@ -2,7 +2,7 @@ from src.services.queue_service import QueueService
 from tests.conftest import settings
 
 
-async def test_storage_service_upload_image(client, gcp_pubsub_client) -> None:
+async def test_storage_service_upload_image(gcp_pubsub_client) -> None:
     queue_service = QueueService(settings=settings)
     message = "test message"
     attrs = {"attr_1": "test attr 1", "attr_2": "test attr 2"}

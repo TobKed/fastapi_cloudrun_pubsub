@@ -392,6 +392,7 @@ If you decide to use this repository as a base for your project, you may want to
 - [ ] Add API versioning
 - [ ] Add handling dead letter queue messages (not it is just debug log)
 - [ ] Add monitoring and alerting
+- [ ] Add more tests
 
 ## Links
 
