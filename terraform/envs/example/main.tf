@@ -4,11 +4,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "4.66.0"
+      version = ">= 4.82.0, <= 5.0.0"
     }
   }
 
-  # to store state on the bucket you can use the following backend
+  ##  to store state on the bucket you can use the following backend
   #  backend "gcs" {
   #    bucket = "your-project-bucket-for-terraform"
   #    prefix = "terraform/state/dev"

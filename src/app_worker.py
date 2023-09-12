@@ -1,5 +1,4 @@
 from fastapi import Depends
-from fastapi import Request
 from fastapi import status
 from loguru import logger
 
@@ -49,10 +48,3 @@ async def generate_thumbnails(
             status=ImageThumbnailsGenerationStatus.ERROR,
         )
         image_service.upsert_thumbnails(image_thumbnails=image_thumbnails)
-
-
-@app.post("/generate_thumbnails_dlq", status_code=status.HTTP_204_NO_CONTENT)
-async def generate_thumbnails_dlq(request: Request) -> None:
-    """Just log the request body for dead letter queue."""
-    body = await request.body()
-    logger.info(f"Request from PubSub DLQ: {body=}")
