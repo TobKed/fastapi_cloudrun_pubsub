@@ -81,7 +81,7 @@ resource "google_pubsub_subscription_iam_member" "subscription_subscriber_role" 
   member       = "serviceAccount:${google_service_account.app.email}"
 }
 
-resource "google_pubsub_topic_iam_member" "subscription_subscriber_role_dlq" {
+resource "google_pubsub_topic_iam_member" "topic_publisher_role" {
   topic  = google_pubsub_topic.main.name
   role   = "roles/pubsub.publisher"
   member = "serviceAccount:${google_service_account.app.email}"
