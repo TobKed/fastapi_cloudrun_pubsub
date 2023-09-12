@@ -390,7 +390,7 @@ If you decide to use this repository as a base for your project, you may want to
 - [ ] Add HTTPS
 - [ ] Add authentication
 - [ ] Add API versioning
-- [ ] Add handling dead letter queue messages (not it is just debug log)
+- [ ] Add handling dead letter queue messages (now it is just debug log)
 - [ ] Add monitoring and alerting
 - [ ] Add more tests
 

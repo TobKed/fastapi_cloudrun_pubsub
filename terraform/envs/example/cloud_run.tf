@@ -28,7 +28,7 @@ resource "google_cloud_run_v2_service" "api" {
       }
       env {
         name  = "CLOUD_STORAGE_BUCKET"
-        value = google_storage_bucket.bucket.name
+        value = google_storage_bucket.main.name
       }
       env {
         name  = "DATASTORE_DATABASE"
@@ -42,7 +42,7 @@ resource "google_cloud_run_v2_service" "api" {
     percent = 100
   }
 
-  depends_on = [module.enable_google_apis, google_firestore_database.database, google_pubsub_subscription.main, google_storage_bucket.bucket]
+  depends_on = [module.enable_google_apis, google_firestore_database.database, google_pubsub_subscription.main, google_storage_bucket.main]
 }
 
 resource "google_cloud_run_v2_service" "worker" {
@@ -71,7 +71,7 @@ resource "google_cloud_run_v2_service" "worker" {
       }
       env {
         name  = "CLOUD_STORAGE_BUCKET"
-        value = google_storage_bucket.bucket.name
+        value = google_storage_bucket.main.name
       }
       env {
         name  = "DATASTORE_DATABASE"
@@ -85,7 +85,7 @@ resource "google_cloud_run_v2_service" "worker" {
     percent = 100
   }
 
-  depends_on = [module.enable_google_apis, google_firestore_database.database, google_storage_bucket.bucket]
+  depends_on = [module.enable_google_apis, google_firestore_database.database, google_storage_bucket.main]
 }
 
 resource "google_cloud_run_service_iam_member" "api_invoker" {

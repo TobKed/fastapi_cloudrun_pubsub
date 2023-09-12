@@ -41,13 +41,6 @@ variable "main_subscription_url_path" {
   default     = "/generate_thumbnails"
 }
 
-variable "main_subscription_dead_letter_url_path" {
-  description = "URL path for the main subscription"
-  type        = string
-  default     = "/generate_thumbnails_dlq"
-}
-
-
 ##########################################
 # Cloud Run
 ##########################################
