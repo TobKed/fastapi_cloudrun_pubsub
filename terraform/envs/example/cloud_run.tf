@@ -23,7 +23,7 @@ resource "google_cloud_run_v2_service" "api" {
         value = var.gcp_project_id
       }
       env {
-        name  = "PUBSUB_GENERATE_THUMBNAILS_TOPIC"
+        name  = "PUBSUB_GENERATE_ANNOTATIONS_TOPIC"
         value = google_pubsub_topic.main.name
       }
       env {
@@ -66,7 +66,7 @@ resource "google_cloud_run_v2_service" "worker" {
         value = var.gcp_project_id
       }
       env {
-        name  = "PUBSUB_GENERATE_THUMBNAILS_TOPIC"
+        name  = "PUBSUB_GENERATE_ANNOTATIONS_TOPIC"
         value = google_pubsub_topic.main.name
       }
       env {

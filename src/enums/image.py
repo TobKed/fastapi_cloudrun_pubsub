@@ -2,7 +2,7 @@ from enum import StrEnum
 from enum import auto
 
 
-class ImageThumbnailsGenerationStatus(StrEnum):
+class ImageAnnotationsGenerationStatus(StrEnum):
     PENDING = auto()
     QUEUED = auto()
     SUCCESS = auto()

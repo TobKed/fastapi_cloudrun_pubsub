@@ -11,7 +11,7 @@ Putting a Python app and infrastructure together from scratch can be a tedious a
 **Table of Contents**
 
 - [Dealing with Long-Running Tasks in API Development: A Queueing Solution](#dealing-with-long-running-tasks-in-api-development-a-queueing-solution)
-- [Example application - Thumbnails Generation](#example-application---thumbnails-generation)
+- [Example application - Image Classification API](#example-application---image-classification-api)
   - [Application Workflow](#application-workflow)
   - [Code for main endpoints](#code-for-main-endpoints)
     - [Api](#api)
@@ -49,10 +49,12 @@ This approach not only elevates the end-user experience but also optimizes the u
 As a result, long-running tasks can be efficiently managed without impeding the core functionality of the API, offering a streamlined and efficient solution to a common challenge in modern web application development.
 
 
-## Example application - Thumbnails Generation
+## Example application - Image Classification API
 
-Working with images inherently requires time and computing resources. However, expecting users to wait several seconds for a response containing links with thumbnails is not user-friendly.
-Our example application demonstrates the strategy of offloading time-consuming tasks to a queue, effectively delegating thumbnail generation to a dedicated worker.
+The Image Classification API is a small service that allows users to submit images and receive classifications based on the content of those images.
+Working with images inherently requires time and computing resources.
+However, expecting users to wait several seconds for a response is not user-friendly.
+Our example application demonstrates the strategy of offloading time-consuming tasks to a queue, effectively delegating image classification to a dedicated worker.
 This approach ensures a seamless user experience while efficiently managing resource-intensive processes.
 
 ### Application Workflow
@@ -60,97 +62,106 @@ This approach ensures a seamless user experience while efficiently managing reso
 1. #### Image Upload and Hashing:
 
     When an image is uploaded, the application calculates a hash of the file content.
-    This hash serves as a unique identifier for the uploaded image, allowing us to track results and prevent redundant thumbnail generation.
+    This hash serves as a unique identifier for the uploaded image, allowing us to track results and prevent redundant image classification generation.
 
-1. ####  Thumbnail Generation Request:
+1. ####  Image Classification Generation Request:
 
-    If thumbnail data is found in the database (based on the hash), it is returned immediately.
+    If Image Classification data is found in the database (based on the hash), it is returned immediately.
 
-    If no thumbnails are found for the uploaded image, the response is sent back promptly, including the hash and a 'pending' status.
-    Subsequently, an asynchronous background process uploads the image to the bucket and sends a message to a PubSub queue, which then triggers the thumbnail generation process.
+    If no Image Classification is found for the uploaded image, the response is sent back promptly, including the hash and a 'pending' status.
+    Subsequently, an asynchronous background process uploads the image to the bucket and sends a message to a PubSub queue, which then triggers the Image Classification generation process.
 
 1. #### Queueing and Asynchronous Processing:
 
-    The PubSub queue connects with a worker through a push subscription. When a new message arrives, it's pushed to the worker, initiating thumbnail generation.
+    The PubSub queue connects with a worker through a push subscription. When a new message arrives, it's pushed to the worker, initiating Image Classification generation.
+    The worker receives the message, generates Image Classification for the image.
+    Upon successful Image Classification generation the worker updates the database entry for the corresponding image and is now readily available for retrieval..
 
-1. #### Thumbnail Generation and Cloud Storage:
+1. #### Response with classification:
 
-    The worker receives the message, generates thumbnails for the image, and uploads them to a public cloud storage bucket. The generated thumbnails are now readily available for retrieval.
-    Upon successful thumbnail generation and storage, the worker updates the database entry for the corresponding image with the links to the source image and its thumbnails.
-
-1. #### Response with Links:
-
-    Subsequent requests for the image now return a response containing links to the source image and its associated thumbnails.
-    By following this workflow, we ensure that images are processed efficiently, avoiding duplicate thumbnail generation and providing users with responsive access to their images and their respective thumbnails.
+    Subsequent requests for the image now return a response containing links to the source image and its associated is now readily available for retrieval.
+    By following this workflow, we ensure that images are processed efficiently, avoiding duplicate classification generation and providing users with responsive access to their source image and respective classification.
 
 ### Code for main endpoints
 
 #### Api
 
 ```python
-@app.post("/image/upload/")
-async def upload_image(
-    file: UploadFile,
+@app.post("/what/fast")
+async def what_is_it_fast(
+    img: UploadFile,
     background_tasks: BackgroundTasks,
     image_service: ImageService = Depends(ImageService),
-) -> ImageThumbnails:
-    image_service.validate_image(file)
-    image_hash = await image_service.calculate_hash(file=file)
-    image_thumbnails = image_service.get_thumbnails(image_hash=image_hash)
+) -> ImageClassification | JSONResponse:
+    image_service.validate_image(file=img)
+    image_hash = await image_service.calculate_hash(file=img)
+    image_classification = image_service.get_image_classification(image_hash=image_hash)
 
-    if image_thumbnails:
-        return image_thumbnails
+    if image_classification:
+        logger.info(f"Image Classification already in db: {image_classification=}")
+        return image_classification
 
-    image_thumbnails = ImageThumbnails(
-        image_hash=image_hash,
-        status=ImageThumbnailsGenerationStatus.PENDING,
+    logger.info(
+        f"Image Classification not found in db, "
+        f"sending annotation generation request to the queue: {image_classification=}",
     )
-    image_service.upsert_thumbnails(image_thumbnails=image_thumbnails)
+
+    image_classification = ImageClassification(
+        image_hash=image_hash,
+        status=ImageAnnotationsGenerationStatus.PENDING,
+    )
+
+    image_service.upsert_image_classification(image_classification=image_classification)
     background_tasks.add_task(
         image_service.send_generation_request_to_worker,
-        file=file,
-        image_thumbnails=image_thumbnails,
+        file=img,
+        image_classification=image_classification,
     )
-    return image_thumbnails
+    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content=image_classification)
+
 ```
 
 #### Worker
 
 ```python
-@app.post("/generate_thumbnails", status_code=status.HTTP_204_NO_CONTENT)
-async def generate_thumbnails(
-    pubsub_request: GooglePubSubPushRequestGenerateThumbnails,
+@app.post("/generate_annotations", status_code=status.HTTP_204_NO_CONTENT)
+async def generate_annotations(
+    pubsub_request: GooglePubSubPushRequestImageClassification,
     image_service: ImageService = Depends(ImageService),
 ) -> None:
+    logger.debug(f"Request from PubSub: {pubsub_request}")
+
     image_hash = pubsub_request.message.attributes.image_hash
     image_url = pubsub_request.message.attributes.image_url
 
     try:
-        image_thumbnails = image_service.get_thumbnails(image_hash=image_hash)
-        if not image_thumbnails:
-            msg = f"Image thumbnails does not exist. {image_hash=}"
-            raise ThumbnailGenerationError(detail=msg, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        if image_thumbnails.status.is_done():
-            logger.debug(f"Image thumbnails already processed: {image_thumbnails=}")
+        image_classification = image_service.get_image_classification(image_hash=image_hash)
+        if not image_classification:
+            msg = f"Image Classification not found in db: {image_hash=}"
+            logger.info(msg)
+            raise AnnotationGenerationError(detail=msg, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if image_classification.status.is_done():
+            logger.info(f"Image Classification is already processed: {image_classification=}")
             return
 
-        thumbnails = await image_service.generate_thumbnails(image_hash=image_hash, image_url=image_url)
+        image_content = await image_service.get_image_content_from_url(url=image_url)
+        annotations = image_service.generate_annotations(contents=image_content)
 
-        image_thumbnails = ImageThumbnails(
+        image_classification = ImageClassification(
             image_hash=image_hash,
             image_url=image_url,
-            thumbnails=thumbnails,
-            status=ImageThumbnailsGenerationStatus.SUCCESS,
+            annotations=annotations,
+            status=ImageAnnotationsGenerationStatus.SUCCESS,
         )
-        image_service.upsert_thumbnails(image_thumbnails=image_thumbnails)
-    except ThumbnailGenerationError:
-        logger.exception(f"Error generating thumbnails: {image_hash=}", exc_info=True)
-        image_thumbnails = ImageThumbnails(
+        image_service.upsert_image_classification(image_classification=image_classification)
+    except AnnotationGenerationError:
+        logger.exception(f"Error generating annotations for Image Classification: {image_hash=}", exc_info=True)
+        image_classification = ImageClassification(
             image_hash=image_hash,
             image_url=image_url,
-            status=ImageThumbnailsGenerationStatus.ERROR,
+            status=ImageAnnotationsGenerationStatus.ERROR,
         )
-        image_service.upsert_thumbnails(image_thumbnails=image_thumbnails)
+        image_service.upsert_image_classification(image_classification=image_classification)
 ```
 
 ### Sequence diagram
@@ -165,12 +176,12 @@ sequenceDiagram
     participant storage  as Storage
 
     Note over portal,storage: data not populated
-    portal ->> fsapi : POST /image/upload/
+    portal ->> fsapi : POST /what/fast/
     fsapi ->> fsapi: calculate hash
     fsapi ->> db : check
     db ->> fsapi : data not exists
     fsapi ->> db : insert status: pending
-    fsapi ->> portal : 200<br><br>{"image_hash": "<hash>", "status": "pending"}
+    fsapi ->> portal : 202<br><br>{"image_hash": "<hash>", "status": "pending"}
     fsapi -->> storage : upload image
     fsapi -->> qu : send to queue
     fsapi -->> db : update status: queued
@@ -182,11 +193,10 @@ sequenceDiagram
     fsapi ->> fsapi: calculate hash
     fsapi ->> db : check
     db ->> fsapi : data exists
-    fsapi ->> portal : 200<br><br>{"image_hash": "<hash>", "status": "queued"}
+    fsapi ->> portal : 202<br><br>{"image_hash": "<hash>", "status": "queued"}
 
     worker ->> storage: download source image
-    worker ->> worker: thumbnails generation
-    worker ->> storage: upload thumbnails
+    worker ->> worker: classification generation
     worker ->> db: update status: success or error
 
     Note over portal,storage: data populated
@@ -292,7 +302,7 @@ Example infrastructure is defined in [`terraform/envs/example`](./terraform/envs
     You can build and push docker image manually:
 
     ```bash
-    EXAMPLE_TAG="europe-west1-docker.pkg.dev/your-project-id/thumbnails-generation-repository/thumbnails-generation:latest"
+    EXAMPLE_TAG="europe-west1-docker.pkg.dev/your-project-id/image-classification-generation-repository/image-classification-generation:latest"
     docker build . -f compose/Dockerfile --target production --tag $EXAMPLE_TAG
     docker push $EXAMPLE_TAG
     ```
@@ -398,3 +408,4 @@ If you decide to use this repository as a base for your project, you may want to
 
 - [github.com/googleapis/python-pubsub/samples](https://github.com/googleapis/python-pubsub/tree/main/samples)
 - [github.com/expobrain/google-pubsub-emulator-python](https://github.com/expobrain/google-pubsub-emulator-python)
+- [github.com/inirudebwoy/ml-for-devs-goodiebag](https://github.com/inirudebwoy/ml-for-devs-goodiebag)

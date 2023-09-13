@@ -32,19 +32,19 @@ variable "datastore_location" {
 variable "app_name" {
   description = "Short app name without spaces or underscores"
   type        = string
-  default     = "thumbnails-generation"
+  default     = "image-classification-generation"
 }
 
 variable "main_subscription_url_path" {
   description = "URL path for the main subscription"
   type        = string
-  default     = "/generate_thumbnails"
+  default     = "/generate_annotations"
 }
 
 variable "main_subscription_dead_letter_url_path" {
   description = "URL path for the main subscription"
   type        = string
-  default     = "/generate_thumbnails_dlq"
+  default     = "/generate_annotations_dlq"
 }
 
 

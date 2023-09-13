@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 
 class TestGetImageGenerationStatusEndpoint:
-    url = "/image/status"
+    url = "/what/status"
 
     async def test_raises_for_missing_image(self, client_api: AsyncClient) -> None:
         response = await client_api.get(self.url + "/foo")

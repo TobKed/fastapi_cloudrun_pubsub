@@ -24,14 +24,14 @@ class GooglePubSubPushRequestBase(BaseModel):
     model_config = ConfigDict(extra=Extra.ignore)
 
 
-class GooglePubSubMessageGenerateThumbnailsAttributes(BaseModel):
+class GooglePubSubMessageImageClassificationAttributes(BaseModel):
     image_hash: str
     image_url: str
 
 
-class GooglePubSubMessageGenerateThumbnails(GooglePubSubMessageBase):
-    attributes: GooglePubSubMessageGenerateThumbnailsAttributes
+class GooglePubSubMessageImageClassification(GooglePubSubMessageBase):
+    attributes: GooglePubSubMessageImageClassificationAttributes
 
 
-class GooglePubSubPushRequestGenerateThumbnails(GooglePubSubPushRequestBase):
-    message: GooglePubSubMessageGenerateThumbnails
+class GooglePubSubPushRequestImageClassification(GooglePubSubPushRequestBase):
+    message: GooglePubSubMessageImageClassification
