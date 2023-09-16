@@ -75,6 +75,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           persist-credentials: false
+          submodules: recursive
+          lfs: true
+
+
 
       - name: GCP Authentication
         uses: google-github-actions/auth@35b0e87d162680511bf346c299f71c9c5c379033  # v1.1.1
