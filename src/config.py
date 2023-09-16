@@ -10,11 +10,13 @@ MODEL_DIR = str(ROOT_DIR / "ml_models/google/vit-base-patch16-224")
 
 class Settings(BaseSettings):
     debug: bool = False
-    title: str = "FastAPI, CluudRun and PubSub"
+    title: str = "Image Classification API"
     version: str = "0.0.1"
 
     max_file_size: int = 5 * 1024 * 1024  # 5MB
     allowed_content_types: tuple[str, ...] = ("image/jpeg", "image/png")
+    ml_model_dir: str = MODEL_DIR
+    num_annotations: int = 5  # Number of top annotations to display
 
     google_project_id: str
     pubsub_project_id: str | None = None
@@ -24,9 +26,6 @@ class Settings(BaseSettings):
     pubsub_generate_annotations_topic: str
     cloud_storage_bucket: str
     datastore_database: str | None = None
-
-    ml_model_dir: str = MODEL_DIR
-    num_annotations: int = 5  # Number of top annotations to display
 
     @property
     def fastapi_kwargs(self) -> dict[str, Any]:

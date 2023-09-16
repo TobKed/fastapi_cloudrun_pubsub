@@ -20,6 +20,7 @@ async def get_image(
     image_hash: str,
     image_service: ImageService = Depends(ImageService),
 ) -> ImageClassification:
+    """Returns image classification if it exists in the database."""
     image_classification = image_service.get_image_classification(image_hash=image_hash)
 
     if not image_classification:
@@ -36,6 +37,7 @@ async def what_is_it_slow(
     img: UploadFile,
     image_service: ImageService = Depends(ImageService),
 ) -> ImageClassification:
+    """Returns image classification if it exists in the database, otherwise generates it synchronously."""
     image_service.validate_image(file=img)
     image_hash = await image_service.calculate_hash(file=img)
     image_classification = image_service.get_image_classification(image_hash=image_hash)
@@ -71,6 +73,7 @@ async def what_is_it_fast(
     background_tasks: BackgroundTasks,
     image_service: ImageService = Depends(ImageService),
 ) -> ImageClassification:
+    """Returns image classification if it exists in the database, otherwise sends a request to the queue."""
     image_service.validate_image(file=img)
     image_hash = await image_service.calculate_hash(file=img)
     image_classification = image_service.get_image_classification(image_hash=image_hash)
@@ -95,4 +98,4 @@ async def what_is_it_fast(
         file=img,
         image_classification=image_classification,
     )
-    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content=image_classification)
+    return JSONResponse(status_code=status.HTTP_202_ACCEPTED, content=dict(image_classification))

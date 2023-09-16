@@ -23,4 +23,6 @@ module "github_actions_oidc" {
 
   github_repositories               = [var.oidc_github_repository]
   github_actions_service_account_id = google_service_account.github_actions_sa.id
+
+  depends_on = [google_project_iam_member.github_actions_account_role_binding]
 }

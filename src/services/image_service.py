@@ -23,6 +23,7 @@ from src.services.database_service import DatabaseService
 from src.services.queue_service import QueueService
 from src.services.storage_service import StorageService
 from src.utils.helpers import get_extension_from_filename
+from src.utils.logging import debug_log_function_call
 
 
 class ImageService:
@@ -115,6 +116,7 @@ class ImageService:
             content_type=content_type,
         )
 
+    @debug_log_function_call
     async def send_generation_request_to_worker(
         self,
         *,

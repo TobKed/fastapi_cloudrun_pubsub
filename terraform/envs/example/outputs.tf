@@ -1,3 +1,7 @@
+output "google_storage_bucket" {
+  value = google_storage_bucket.bucket.name
+}
+
 output "container_image" {
   value = local.image
 }
