@@ -2,13 +2,19 @@ from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import Extra
 
-from src.enums.image import ImageThumbnailsGenerationStatus
+from src.enums.image import ImageAnnotationsGenerationStatus
 
 
-class ImageThumbnails(BaseModel):
+class ImageAnnotation(BaseModel):
+    index: int
+    label: str
+    confidence: float
+
+
+class ImageClassification(BaseModel):
     image_hash: str
     image_url: str | None = None
-    thumbnails: list[str] = []
-    status: ImageThumbnailsGenerationStatus
+    annotations: list[ImageAnnotation] = []
+    status: ImageAnnotationsGenerationStatus
 
     model_config = ConfigDict(extra=Extra.allow)

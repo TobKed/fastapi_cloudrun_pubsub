@@ -1,16 +1,16 @@
 import pytest
 
-from src.enums.image import ImageThumbnailsGenerationStatus
+from src.enums.image import ImageAnnotationsGenerationStatus
 
 
 @pytest.mark.parametrize(
     ("status", "expected_done"),
     [
-        (ImageThumbnailsGenerationStatus.PENDING, False),
-        (ImageThumbnailsGenerationStatus.QUEUED, False),
-        (ImageThumbnailsGenerationStatus.SUCCESS, True),
-        (ImageThumbnailsGenerationStatus.ERROR, True),
+        (ImageAnnotationsGenerationStatus.PENDING, False),
+        (ImageAnnotationsGenerationStatus.QUEUED, False),
+        (ImageAnnotationsGenerationStatus.SUCCESS, True),
+        (ImageAnnotationsGenerationStatus.ERROR, True),
     ],
 )
-def test_image_thumbnails_generation_status_is_done(status: ImageThumbnailsGenerationStatus, expected_done: bool):
+def test_image_thumbnails_generation_status_is_done(status: ImageAnnotationsGenerationStatus, expected_done: bool):
     assert status.is_done() is expected_done

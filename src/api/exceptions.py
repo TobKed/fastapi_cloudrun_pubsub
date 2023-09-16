@@ -1,5 +1,5 @@
 from fastapi import HTTPException
 
 
-class ThumbnailGenerationError(HTTPException):
+class AnnotationGenerationError(HTTPException):
     pass

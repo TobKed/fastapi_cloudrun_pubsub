@@ -10,7 +10,7 @@ class QueueService:
 
     def __init__(self, settings: Settings = Depends(get_settings)) -> None:
         self.settings = settings
-        self.topic = self.settings.pubsub_generate_thumbnails_topic
+        self.topic = self.settings.pubsub_generate_annotations_topic
         self.project = self.settings.pubsub_project_id or self.settings.google_project_id
 
     @property

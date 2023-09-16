@@ -12,9 +12,9 @@ concurrency:
 
 env:
   PROJECT_ID: ${{ secrets.project_id }}
-  APP_IMAGE_NAME: "thumbnails-generation"
+  APP_IMAGE_NAME: "image-classification-generation"
   DOCKER_REGISTRY: "europe-west1-docker.pkg.dev"
-  DOCKER_REPO: "thumbnails-generation-repository"
+  DOCKER_REPO: "image-classification-generation-repository"
   DOCKER_BUILDKIT: 1
   COMPOSE_DOCKER_CLI_BUILD: 1
 
