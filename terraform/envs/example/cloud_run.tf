@@ -53,7 +53,7 @@ resource "google_cloud_run_v2_service" "worker" {
 
   template {
     scaling {
-      min_instance_count = 1
+      min_instance_count = 0
       max_instance_count = 3
     }
 
@@ -65,7 +65,7 @@ resource "google_cloud_run_v2_service" "worker" {
       resources {
         limits = {
           cpu    = "1000m"
-          memory = "1Gi"
+          memory = "4Gi"
         }
       }
 
