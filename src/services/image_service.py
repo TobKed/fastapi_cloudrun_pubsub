@@ -154,7 +154,7 @@ class ImageService:
         processor = self.get_ml_processor()
         model = self.get_ml_model()
 
-        image = Image.open(io.BytesIO(contents))
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
         inputs = processor(images=image, return_tensors="pt")
 
         with torch.no_grad():
