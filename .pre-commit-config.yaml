@@ -16,6 +16,7 @@ repos:
       - id: doctoc
         name: Add TOC for md files
         files: \.md$
+        exclude: docs/presentation/PRESENTATION.md
         args:
           - "--maxlevel"
           - "4"

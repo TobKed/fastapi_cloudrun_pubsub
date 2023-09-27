@@ -7,7 +7,10 @@ from diagrams.gcp.network import LoadBalancing
 from diagrams.gcp.storage import GCS
 from diagrams.generic.device import Tablet
 
-with Diagram("Thumbnails Generation", filename="diagram_gcp", show=False):
+filename: str = __file__.removesuffix(".py")
+
+
+with Diagram(filename=filename, show=False):
     client = Tablet("client")
 
     with Cluster("GCP"):
