@@ -219,7 +219,7 @@ Here's an overview of the services and components we've integrated:
 1. [Datastore](https://cloud.google.com/datastore): a fully managed NoSQL database service.
 1. [Cloud Storage](https://cloud.google.com/storage): to store images.
 
-![Infrastructure diagram](./docs/diagram_gcp.png)
+![Infrastructure diagram](docs/presentation/diagrams/diag_3.png)
 
 ## Instructions
 
