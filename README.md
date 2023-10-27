@@ -275,37 +275,47 @@ Example infrastructure is defined in [`terraform/envs/example`](./terraform/envs
 
     It is required to create artifacts registry first, because it is used to store docker images.
 
-1. #### Push docker image to artifacts registry: #1 use GitHub Actions
+1. #### Push docker image to artifacts registry:
 
-    You can fork this repository, enable GitHub Actions and then push changes to `master` branch.
-    Before doing this you have to setup Open Id Connect Provider and Service Account:
+    1. #### GitHub Actions
 
-    ```bash
-    terraform apply --target=module.github_actions_oidc
-    ```
+        Set `oidc_github_repository` variable in `terraform.tfvars` file ([Terraform docs: assiging variables](https://developer.hashicorp.com/terraform/language/values/variables#assigning-values-to-root-module-variables))
 
-    Then you have to setup GitHub Actions secrets:
+        You can fork this repository, enable GitHub Actions and then push changes to `master` branch.
+        Before doing this you have to setup Open Id Connect Provider and Service Account:
 
-     - `project_id`: your-project-project_id
-     - `workload_identity_provider`: printed by `terraform output github_actions_oidc_workload_identity_provider`
-     - `service_account`: printed by `terraform output github_actions_service_account`
+        ```bash
+        terraform apply --target=module.github_actions_oidc
+        ```
 
-    Replace `TobKed/fastapi_cloudrun_pubsub` to your repository name in [`.github/workflows/ci.yaml`](./.github/workflows/ci.yaml) file.
+        Then you have to setup GitHub Actions secrets:
 
-    After that you can push changes to `master` branch and GitHub Actions will build and push docker image to artifacts registry.
+         - `project_id`: your-project-project_id
+         - `workload_identity_provider`: printed by `terraform output github_actions_oidc_workload_identity_provider`
+         - `service_account`: printed by `terraform output github_actions_service_account`
 
+        Replace `TobKed/fastapi_cloudrun_pubsub` to your repository name in [`.github/workflows/ci.yaml`](./.github/workflows/ci.yaml) file.
 
-1. #### Push docker image to artifacts registry: #2 use docker locally
+        After that you can push changes to `master` branch and GitHub Actions will build and push docker image to artifacts registry.
 
-    If you are not using GitHub Actions, you can delete `github_actions_oidc.tf` file.
+    1. #### Docker locally
 
-    You can build and push docker image manually:
+        If you are not using GitHub Actions, make sure `oidc_github_repository` variable is an empty string in `terraform.tfvars` file.
 
-    ```bash
-    EXAMPLE_TAG="europe-west1-docker.pkg.dev/your-project-id/image-classification-generation-repository/image-classification-generation:latest"
-    docker build . -f compose/Dockerfile --target production --tag $EXAMPLE_TAG
-    docker push $EXAMPLE_TAG
-    ```
+        Configure docker to work with Artifacts Registry (example command, your region may differ):
+
+        ```bash
+        gcloud auth configure-docker europe-west1-docker.pkg.dev
+        ```
+
+        You can build and push docker image manually (example command, your region may differ and project-id in the tag will differ for sure):
+
+        ```bash
+        # change directory to root project folder
+        export EXAMPLE_TAG="europe-west1-docker.pkg.dev/your-project-id/image-classification-generation-repository/image-classification-generation:latest"
+        docker build . -f compose/Dockerfile --target production --tag $EXAMPLE_TAG
+        docker push $EXAMPLE_TAG
+        ```
 
 1. #### Create infrastructure
 

@@ -26,6 +26,16 @@ variable "datastore_location" {
 }
 
 ##########################################
+# GitHub Actions OIDC
+##########################################
+
+variable "oidc_github_repository" {
+  description = "GitHub repository for which the OIDC will be configures. If empty OIDC resources will not be created."
+  type        = string
+  default     = ""
+}
+
+##########################################
 # Application
 ##########################################
 
@@ -68,13 +78,4 @@ variable "container_command_worker" {
   description = "Command to run during the container startup"
   type        = list(string)
   default     = ["/start_worker"]
-}
-
-##########################################
-# GitHub Actions OIDC
-##########################################
-
-variable "oidc_github_repository" {
-  description = "GitHub repository for which the OIDC will be configures"
-  type        = string
 }
