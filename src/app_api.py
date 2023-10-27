@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from fastapi import UploadFile
 from fastapi import status
 from fastapi.responses import JSONResponse
+from fastapi.responses import RedirectResponse
 from loguru import logger
 
 from src.api.app import create_app
@@ -13,6 +14,11 @@ from src.schemas.image import ImageClassification
 from src.services.image_service import ImageService
 
 app = create_app()
+
+
+@app.get("/", include_in_schema=False)
+async def docs_redirect() -> RedirectResponse:
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/what/status/{image_hash}")

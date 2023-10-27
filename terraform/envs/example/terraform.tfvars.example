@@ -3,4 +3,7 @@ gcp_region     = "europe-west1"
 gcp_zone       = "europe-west1-b"
 
 app_name               = "image-classification-generation"
+
+# If empty string then OIDC resources will not be created
+# oidc_github_repository = ""
 oidc_github_repository = "TobKed/fastapi_cloudrun_pubsub"
