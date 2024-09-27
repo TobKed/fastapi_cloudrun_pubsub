@@ -245,6 +245,7 @@ What you should prepare:
  - [`gcloud`](https://cloud.google.com/sdk/gcloud) - install GCP cli and authorize it with a choosen GCP Project
  - [Terraform](https://www.terraform.io/downloads.html) - install the latest version
  - Python 3.11 and [Poetry](https://python-poetry.org/docs/#installation)
+ - Checkout this repository with submodules and LFS (`git submodule foreach git lfs pull`)
 
 ### Cloud infrastructure
 
