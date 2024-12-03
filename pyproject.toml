@@ -17,7 +17,7 @@ loguru = "^0.7.0"
 pillow = "^10"
 pydantic = {extras = ["dotenv"], version = "*"}
 pydantic-settings = "*"
-python-multipart = "^0.0.6"
+python-multipart = "^0.0.18"
 torch = ">=2.0.0, !=2.0.1"
 transformers = {extras = ["torch"], version = "^4"}
 uvicorn = "*"
