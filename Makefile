@@ -46,29 +46,29 @@ update-pre-commit: ## Update pre-commit hooks
 	pre-commit autoupdate
 
 .PHONY: run
-run: ## Run docker-compose in detached mode
-	docker-compose -f docker-compose.yaml -f docker-compose.gcp-default-credentials.yaml up --detach
+run: ## Run docker compose in detached mode
+	dockercompose -f docker-compose.yaml -f docker compose.gcp-default-credentials.yaml up --detach
 
 .PHONY: stop
-stop: ## Stop docker-compose
-	docker-compose down
+stop: ## Stop docker compose
+	docker compose down
 
 .PHONY: build
-build: purge ## Build docker-compose from scratch
-	docker-compose build
+build: purge ## Build docker compose from scratch
+	docker compose build
 
 .PHONY: purge
-purge: ## Purge docker-compose
-	docker-compose down --remove-orphans
+purge: ## Purge docker compose
+	docker compose down --remove-orphans
 
 .PHONY: logs
-logs: ## Show docker-compose logs
-	docker-compose logs --timestamps --follow
+logs: ## Show docker compose logs
+	docker compose logs --timestamps --follow
 
 .PHONY: test
 test: ## Run pytest
-	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest ${args}
+	docker compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest ${args}
 
 .PHONY: test-verbose
 test-verbose: ## Run pytest with verbose output
-	docker-compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest -s -x -vv --pdb ${args}
+	docker compose run --rm $(DOCKER_COMPOSE_SERVICE_WORKER) pytest -s -x -vv --pdb ${args}
